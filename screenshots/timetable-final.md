@@ -1,0 +1,1 @@
+Final timetable result image is included in the repository assets.
