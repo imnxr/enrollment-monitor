@@ -1,8 +1,19 @@
 # Enrollment Monitor
 
+![Python](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python)
+![Playwright](https://img.shields.io/badge/Playwright-Browser%20Automation-green?logo=playwright)
+![ntfy](https://img.shields.io/badge/ntfy-Push%20Notifications-purple)
+![License](https://img.shields.io/badge/License-MIT-lightgrey)
+
 A lightweight Python + Playwright browser monitor that watches an authorized enrollment page and sends an instant phone alert when the page changes from an inactive state to a possible active state.
 
 > Built to solve a very specific problem: enrollment windows can open at unpredictable times, authenticated sessions can expire, and desired sections can fill quickly. Instead of manually refreshing a page, the monitor handles the waiting and alerts the user when attention is needed.
+
+## Problem
+
+Enrollment portals can be frustrating to monitor manually. A registration window may open without a predictable time, a login session may expire while waiting, and preferred sections can disappear quickly.
+
+This project automates the waiting without automating the actual enrollment submission.
 
 ## Features
 
@@ -10,13 +21,35 @@ A lightweight Python + Playwright browser monitor that watches an authorized enr
 - Uses a persistent Chromium profile for an existing authenticated browser session
 - Sends lightweight authenticated heartbeats every 45 seconds by default
 - Detects login/session expiration
-- Detects a configurable "closed" page marker
+- Detects a configurable closed-page marker
 - Performs a second confirmation check before triggering an opening alert
 - Sends urgent push notifications through [ntfy](https://ntfy.sh/)
 - Plays a local Windows alarm
 - Saves a screenshot when an opening is confirmed
 - Treats server errors and unexpected pages as errors, not as an enrollment opening
 - Does not automatically submit enrollment requests or bypass authentication
+
+## Screenshots
+
+The screenshots below are sanitized examples from a real run.
+
+### Monitoring a closed enrollment page
+
+![Enrollment monitor running](screenshots/enrollment-monitor-started.png)
+
+The monitor detects the inactive state and waits for the next 90-second check.
+
+### Enrollment opening detected
+
+![Enrollment opening detected](screenshots/enrollment-trigger-actived.png)
+
+The closed marker disappears, a second confirmation is successful, and the monitor raises the opening alert.
+
+### Phone notification
+
+![Phone notification](screenshots/ntfy-mobile%20notifications.jpg)
+
+The alert is delivered to the phone through ntfy so the user does not need to keep watching the browser.
 
 ## How it works
 
@@ -28,7 +61,7 @@ A lightweight Python + Playwright browser monitor that watches an authorized enr
                                  │
                                  ▼
                     ┌────────────────────────┐
-                    │  Playwright Monitor     │
+                    │   Playwright Monitor    │
                     └────────────┬───────────┘
                                  │
                     ┌────────────┴────────────┐
@@ -98,19 +131,19 @@ Then edit `.env`:
 
 ```env
 TARGET_URL=https://example.com/enrollment
-NTFY_TOPIC=your-ntfy-topic-here
+NTFY_TOPIC=your-private-ntfy-topic
 CLOSED_MARKER=enrollment is not active
 CHECK_INTERVAL=90
 HEARTBEAT_INTERVAL=45
 ```
 
-The `TARGET_URL` and `CLOSED_MARKER` are intentionally configurable so the monitor can be adapted to different portals without changing the Python source.
+The `TARGET_URL` and `CLOSED_MARKER` are intentionally configurable so the monitor can be adapted to different authorized portals without changing the Python source.
 
 ### 4. Subscribe to ntfy
 
 Install the ntfy app on the phone and subscribe to the same topic configured in `.env`.
 
-Enable notifications, sound/vibration, background operation, and any Android settings required for reliable delivery on the device.
+Enable notifications, sound/vibration, background operation, and any operating-system settings required for reliable delivery on the device.
 
 ### 5. Start the monitor
 
@@ -141,7 +174,7 @@ python monitor.py test
 
 The monitor separates **session maintenance** from **enrollment detection**.
 
-A lightweight authenticated heartbeat runs every 45 seconds so an inactivity-based session timeout is less likely to occur. The actual enrollment page is checked every 90 seconds, reducing unnecessary page loads while still providing frequent detection.
+A lightweight authenticated heartbeat runs every 45 seconds so an inactivity-based session timeout is less likely to occur. The actual enrollment page is checked every 90 seconds, reducing unnecessary full page loads while still providing frequent detection.
 
 These values are configurable because different portals can have different session policies and traffic constraints.
 
