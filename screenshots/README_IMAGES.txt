@@ -1,0 +1,1 @@
+Screenshot assets are stored as binary files in this directory.
